@@ -530,15 +530,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const resultado = guardarEstados();
             
             if (resultado) {
-                // Mostrar confirmación
-                alert('¡Progreso guardado correctamente!');
+                // Mostrar confirmación con mensaje flash
+                mostrarMensajeFlash('¡Progreso guardado correctamente!', 'success');
                 console.log('Guardado exitoso en localStorage y cookies');
             } else {
-                alert('Error al guardar el progreso. Inténtalo de nuevo.');
+                mostrarMensajeFlash('Error al guardar el progreso', 'error');
             }
         } catch (error) {
             console.error('Error en el proceso de guardado:', error);
-            alert('Error al guardar el progreso. Inténtalo de nuevo.');
+            mostrarMensajeFlash('Error al guardar el progreso', 'error');
         } finally {
             // Restaurar el botón
             this.disabled = false;
@@ -607,46 +607,57 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Configurar botón de reinicio
     document.getElementById('reiniciarBtn').addEventListener('click', function() {
-        if (confirm('¿Estás seguro de que quieres reiniciar todas las materias a su estado inicial? Esta acción no se puede deshacer.')) {
-            try {
-                // Guardar en historial antes de reiniciar
-                guardarEnHistorial();
-                
-                // Mostrar indicador de carga
-                this.disabled = true;
-                this.innerHTML = 'Reiniciando...';
-                
-                // Reiniciar estados de materias
-                estadosMaterias = {};
-                
-                // Eliminar clases de todas las materias
-                todasLasMaterias.forEach(materia => {
-                    materia.classList.remove('cursando');
-                    materia.classList.remove('aprobada');
-                });
-                
-                // Reinicializar materias (esto aplicará las clases bloqueadas correctamente)
-                inicializarMaterias();
-                
-                // Revisar correlativas para actualizar estados
-                revisarCorrelativas();
-                
-                // Actualizar barra de progreso
-                actualizarBarraProgreso();
-                
-                // Ya no guardamos automáticamente
-                // guardarEstados();
-                
-                // Mostrar mensaje flash
-                mostrarMensajeFlash('¡Materias reiniciadas correctamente!', 'success');
-            } catch (error) {
-                console.error('Error en el proceso de reinicio:', error);
-                alert('Error al reiniciar las materias. Inténtalo de nuevo.');
-            } finally {
-                // Restaurar el botón
-                this.disabled = false;
-                this.innerHTML = 'Reiniciar materias';
-            }
+        // Mostrar el modal de confirmación en lugar del alert
+        const reinicioModal = new bootstrap.Modal(document.getElementById('reinicioModal'));
+        reinicioModal.show();
+    });
+    
+    // Configurar botón de confirmación dentro del modal
+    document.getElementById('confirmarReinicioBtn').addEventListener('click', function() {
+        try {
+            // Guardar en historial antes de reiniciar
+            guardarEnHistorial();
+            
+            // Ocultar el modal
+            const reinicioModal = bootstrap.Modal.getInstance(document.getElementById('reinicioModal'));
+            reinicioModal.hide();
+            
+            // Mostrar indicador de carga en el botón principal
+            const reiniciarBtn = document.getElementById('reiniciarBtn');
+            reiniciarBtn.disabled = true;
+            reiniciarBtn.innerHTML = 'Reiniciando...';
+            
+            // Reiniciar estados de materias
+            estadosMaterias = {};
+            
+            // Eliminar clases de todas las materias
+            todasLasMaterias.forEach(materia => {
+                materia.classList.remove('cursando');
+                materia.classList.remove('aprobada');
+            });
+            
+            // Reinicializar materias (esto aplicará las clases bloqueadas correctamente)
+            inicializarMaterias();
+            
+            // Revisar correlativas para actualizar estados
+            revisarCorrelativas();
+            
+            // Actualizar barra de progreso
+            actualizarBarraProgreso();
+            
+            // Ya no guardamos automáticamente
+            // guardarEstados();
+            
+            // Mostrar mensaje flash
+            mostrarMensajeFlash('¡Materias reiniciadas correctamente!', 'success');
+        } catch (error) {
+            console.error('Error en el proceso de reinicio:', error);
+            mostrarMensajeFlash('Error al reiniciar las materias', 'error');
+        } finally {
+            // Restaurar el botón principal
+            const reiniciarBtn = document.getElementById('reiniciarBtn');
+            reiniciarBtn.disabled = false;
+            reiniciarBtn.innerHTML = 'Reiniciar materias';
         }
     });
     

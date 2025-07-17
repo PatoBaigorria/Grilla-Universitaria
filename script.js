@@ -156,7 +156,9 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Aplicar estilos según el estado
         if (materia.classList.contains('bloqueada')) {
-            // Mantener estilo por defecto para materias bloqueadas
+            // Aplicar estilo gris para materias bloqueadas
+            materia.style.backgroundColor = '#e0e0e0';
+            materia.style.color = '#555555';
             return;
         } else if (materia.classList.contains('cursando')) {
             // Estilo para materias cursando
@@ -175,19 +177,45 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Aplicar estilos iniciales a todas las materias no bloqueadas
-    todasLasMaterias.forEach(materia => {
-        if (!materia.classList.contains('bloqueada')) {
+    // Función para inicializar las materias
+    function inicializarMaterias() {
+        // Primero, marcar todas las materias como bloqueadas excepto las del primer año primer cuatrimestre
+        todasLasMaterias.forEach(materia => {
+            // Verificar si es materia del primer año primer cuatrimestre
+            const esPrimerAnioPrimerCuatrimestre = [
+                'algebra-1',
+                'calculo-1',
+                'matematica-computacion-1',
+                'ingles',
+                'seminario',
+                'ingles-2'
+            ].includes(materia.id);
+            
+            // Si no es del primer año primer cuatrimestre y no tiene estado guardado, marcarla como bloqueada
+            if (!esPrimerAnioPrimerCuatrimestre && 
+                !(estadosMaterias[materia.id] && 
+                  (estadosMaterias[materia.id].cursando || estadosMaterias[materia.id].aprobada))) {
+                
+                // No bloquear si ya tiene la clase bloqueada (como matemática discreta y álgebra 2)
+                if (!materia.classList.contains('bloqueada')) {
+                    materia.classList.add('bloqueada');
+                }
+            }
+            
+            // Aplicar estilos según el estado
             aplicarEstilos(materia);
-        }
-    });
+        });
+    }
+    
+    // Aplicar estilos iniciales a todas las materias
+    inicializarMaterias();
 
     todasLasMaterias.forEach(materia => {
         materia.addEventListener('click', function () {
-            // Permitir hacer clic incluso si está bloqueada
-            // Primero, desbloquear la materia si está bloqueada
+            // Verificar si la materia está bloqueada
             if (this.classList.contains('bloqueada')) {
-                this.classList.remove('bloqueada');
+                // No permitir cambios de estado en materias bloqueadas
+                return;
             }
 
             const estaAprobada = this.classList.contains('aprobada');
@@ -289,64 +317,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             
-            // Caso especial para Fundamentos: se desbloquea y cambia al color habilitado, pero no a cursando/aprobada
-            if (materia.id === 'fundamentos') {
-                // Si ya está cursando o aprobada por interacción del usuario, respetamos ese estado
-                if (estadosMaterias[materia.id] && (estadosMaterias[materia.id].cursando || estadosMaterias[materia.id].aprobada)) {
-                    return;
-                }
+            const requisitosStr = materia.getAttribute('data-correlativas');
+            
+            // Si no tiene correlatividades definidas y no es del primer año primer cuatrimestre,
+            // mantenerla bloqueada (esto afecta a las materias optativas)
+            if (!requisitosStr) {
+                // Verificar si es materia del primer año primer cuatrimestre
+                const esPrimerAnioPrimerCuatrimestre = [
+                    'algebra-1',
+                    'calculo-1',
+                    'matematica-computacion-1',
+                    'ingles',
+                    'seminario',
+                    'ingles-2'
+                ].includes(materia.id);
                 
-                const requisitosStr = materia.getAttribute('data-correlativas');
-                if (!requisitosStr) return;
-
-                let requisitos;
-                try {
-                    requisitos = JSON.parse(requisitosStr);
-                } catch (e) {
-                    console.error(`Error al parsear requisitos de ${materia.id}`, e);
-                    return;
-                }
-
-                // Agrupar por materia base
-                const grupos = {};
-                requisitos.forEach(req => {
-                    if (!grupos[req.id]) grupos[req.id] = [];
-                    grupos[req.id].push(req.estado);
-                });
-
-                const cumpleTodos = Object.entries(grupos).every(([id, estados]) => {
-                    const materiaRequerida = document.getElementById(id);
-                    return materiaRequerida && estados.some(estado => materiaRequerida.classList.contains(estado));
-                });
-
-                const estabaBloqueada = materia.classList.contains('bloqueada');
-                
-                if (cumpleTodos) {
-                    materia.classList.remove('bloqueada');
-                    
-                    // Aplicar SOLO el estilo de habilitado (rosa), no cursando ni aprobada
-                    if (estabaBloqueada) {
-                        // Aplicar colores de materia habilitada
-                        materia.style.backgroundColor = colorFondoHabilitado;
-                        materia.style.color = colorTextoHabilitado;
-                        
-                        // Efecto visual para destacar que se ha habilitado
-                        materia.style.transition = 'all 0.5s';
-                        materia.style.boxShadow = '0 0 10px rgba(165, 55, 78, 0.7)';
-                        setTimeout(() => {
-                            materia.style.boxShadow = '';
-                        }, 1000);
-                    }
-                } else {
+                // Si no es del primer año primer cuatrimestre, mantenerla bloqueada
+                if (!esPrimerAnioPrimerCuatrimestre) {
                     materia.classList.add('bloqueada');
+                    aplicarEstilos(materia);
                 }
-                
-                // Salimos para que no se procese en el código general
                 return;
             }
-            
-            const requisitosStr = materia.getAttribute('data-correlativas');
-            if (!requisitosStr) return;
 
             let requisitos;
             try {
@@ -373,9 +365,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (cumpleTodos) {
                 materia.classList.remove('bloqueada');
                 // Aplicar estilos si la materia acaba de desbloquearse
+                // Aplicar estilos según el nuevo estado
+                aplicarEstilos(materia);
+                
+                // Efecto visual para destacar que se ha habilitado
                 if (estabaBloqueada) {
-                    aplicarEstilos(materia);
-                    // Efecto visual para destacar que se ha habilitado
                     materia.style.transition = 'all 0.5s';
                     materia.style.boxShadow = '0 0 10px rgba(165, 55, 78, 0.7)';
                     setTimeout(() => {
@@ -384,6 +378,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             } else {
                 materia.classList.add('bloqueada');
+                aplicarEstilos(materia);
             }
         });
     }
@@ -491,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function () {
         guardarEstados();
     }
 
-    // Ejecutar revisión inicial
+    // Ejecutar revisión inicial de correlatividades
     revisarCorrelativas();
     
     // Inicializar la barra de progreso

@@ -12,8 +12,9 @@
 
 <body>
     <div class="container-fluid my-4">
-        <div class="text-center mb-4">
+        <div class="text-center mb-4 position-relative">
             <h1 style="color: #a5374e; display: inline-block; vertical-align: middle;">Licenciatura en Ciencias Matemáticas 🤓</h1>
+            <div id="flashMessage" class="flash-message" style="display: none; position: absolute; right: 10%; top: 50%; transform: translateY(-50%);"></div>
         </div>
 
         <div class="row">
@@ -33,7 +34,7 @@
 
                         <div class="col-6">
                             <h3 class="semester-title mt-4">2º Cuatrimestre</h3>
-                            <div class="materia mt-2 bloqueada" id="matematica-discreta" data-correlativas='[
+                            <div class="materia bloqueada mt-2" id="matematica-discreta" data-correlativas='[
                 {"id":"algebra-1","estado":"cursando"},
                 {"id":"algebra-1","estado":"aprobada"}
               ]'>Matemática Discreta</div>
@@ -141,6 +142,12 @@
                 <div class="progress-details">
                     <span class="materias-aprobadas">0</span> de <span class="total-materias">0</span> materias aprobadas
                 </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="d-flex justify-content-center mt-4">
+                <button id="guardarBtn" class="btn btn-primary mx-2">Guardar progreso</button>
+                <button id="reiniciarBtn" class="btn btn-danger mx-2">Reiniciar materias</button>
             </div>
         </div>
     </div>

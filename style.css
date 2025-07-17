@@ -319,3 +319,29 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 7px 20px rgba(165, 55, 78, 0.4);
 }
+
+/* Estilos para el mensaje flash */
+.flash-message {
+    position: relative;
+    padding: 15px 30px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    z-index: 9999;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.5s ease-in-out;
+    max-width: 400px;
+}
+
+.flash-success {
+    background-color: #28a745;
+}
+
+.flash-error {
+    background-color: #dc3545;
+}
+
+.flash-info {
+    background-color: #17a2b8;
+}

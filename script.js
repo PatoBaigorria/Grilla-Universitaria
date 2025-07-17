@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Objeto para almacenar el estado de las materias
     let estadosMaterias = {};
     
+    // Historial para la función deshacer (hasta 20 movimientos)
+    const historialEstados = [];
+    const maxHistorial = 20;
+    
     // Definir colores para las materias (mover al inicio para evitar errores de referencia)
     // Colores para las materias habilitadas (como las de primer año)
     const colorFondoHabilitado = '#ffc0cb';
@@ -210,6 +214,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // Aplicar estilos iniciales a todas las materias
     inicializarMaterias();
 
+    // Función para guardar el estado actual en el historial
+    function guardarEnHistorial() {
+        // Crear una copia profunda del estado actual
+        const estadoActual = JSON.parse(JSON.stringify(estadosMaterias));
+        
+        // Añadir al historial
+        historialEstados.push(estadoActual);
+        
+        // Limitar el tamaño del historial
+        if (historialEstados.length > maxHistorial) {
+            historialEstados.shift(); // Eliminar el estado más antiguo
+        }
+        
+        // Habilitar el botón de deshacer
+        document.getElementById('deshacerBtn').disabled = false;
+    }
+    
     todasLasMaterias.forEach(materia => {
         materia.addEventListener('click', function () {
             // Verificar si la materia está bloqueada
@@ -220,6 +241,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const estaAprobada = this.classList.contains('aprobada');
             const estaCursando = this.classList.contains('cursando');
+            
+            // Guardar el estado actual en el historial antes de modificarlo
+            guardarEnHistorial();
 
             if (!estaCursando && !estaAprobada) {
                 this.classList.add('cursando');
@@ -522,10 +546,70 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     
+    // Función para deshacer el último cambio
+    function deshacer() {
+        // Verificar si hay estados en el historial
+        if (historialEstados.length === 0) {
+            document.getElementById('deshacerBtn').disabled = true;
+            return;
+        }
+        
+        // Obtener el último estado guardado
+        const estadoAnterior = historialEstados.pop();
+        
+        // Actualizar el estado actual
+        estadosMaterias = estadoAnterior;
+        
+        // Actualizar la interfaz
+        todasLasMaterias.forEach(materia => {
+            // Limpiar clases actuales
+            materia.classList.remove('cursando');
+            materia.classList.remove('aprobada');
+            
+            // Aplicar estado anterior
+            const estadoMateria = estadosMaterias[materia.id];
+            if (estadoMateria) {
+                if (estadoMateria.cursando) {
+                    materia.classList.add('cursando');
+                } else if (estadoMateria.aprobada) {
+                    materia.classList.add('aprobada');
+                }
+            }
+            
+            // Aplicar estilos
+            aplicarEstilos(materia);
+        });
+        
+        // Revisar correlativas y actualizar estados
+        revisarCorrelativas();
+        
+        // Actualizar barra de progreso
+        actualizarBarraProgreso();
+        
+        // Guardar el estado restaurado
+        guardarEstados();
+        
+        // Mostrar mensaje flash
+        mostrarMensajeFlash('Cambio deshecho correctamente', 'info');
+        
+        // Deshabilitar el botón si no hay más estados en el historial
+        if (historialEstados.length === 0) {
+            document.getElementById('deshacerBtn').disabled = true;
+        }
+    }
+    
+    // Configurar botón de deshacer
+    document.getElementById('deshacerBtn').addEventListener('click', function() {
+        deshacer();
+    });
+    
     // Configurar botón de reinicio
     document.getElementById('reiniciarBtn').addEventListener('click', function() {
         if (confirm('¿Estás seguro de que quieres reiniciar todas las materias a su estado inicial? Esta acción no se puede deshacer.')) {
             try {
+                // Guardar en historial antes de reiniciar
+                guardarEnHistorial();
+                
                 // Mostrar indicador de carga
                 this.disabled = true;
                 this.innerHTML = 'Reiniciando...';

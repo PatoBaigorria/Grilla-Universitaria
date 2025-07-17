@@ -249,21 +249,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.classList.add('cursando');
                 // Actualizar el estado guardado
                 estadosMaterias[this.id] = { cursando: true, aprobada: false };
-                // Guardar cambios en localStorage
-                guardarEstados();
+                // Ya no guardamos automáticamente
+                // guardarEstados();
             } else if (estaCursando) {
                 this.classList.remove('cursando');
                 this.classList.add('aprobada');
                 // Actualizar el estado guardado
                 estadosMaterias[this.id] = { cursando: false, aprobada: true };
-                // Guardar cambios en localStorage
-                guardarEstados();
+                // Ya no guardamos automáticamente
+                // guardarEstados();
             } else if (estaAprobada) {
                 this.classList.remove('aprobada');
                 // Actualizar el estado guardado
                 estadosMaterias[this.id] = { cursando: false, aprobada: false };
-                // Guardar cambios en localStorage
-                guardarEstados();
+                // Ya no guardamos automáticamente
+                // guardarEstados();
             }
             
             // Aplicar estilos según el nuevo estado
@@ -506,8 +506,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('.progress-percentage').style.backgroundClip = 'text';
         document.querySelector('.progress-percentage').style.webkitTextFillColor = 'transparent';
         
-        // Guardar el estado actual después de actualizar la barra de progreso
-        guardarEstados();
+        // Ya no guardamos automáticamente al actualizar la barra de progreso
+        // guardarEstados();
     }
 
     // Ejecutar revisión inicial de correlatividades
@@ -516,8 +516,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inicializar la barra de progreso
     actualizarBarraProgreso();
     
-    // Guardar el estado inicial
-    guardarEstados();
+    // Ya no guardamos el estado inicial automáticamente
+    // guardarEstados();
     
     // Configurar botón de guardado
     document.getElementById('guardarBtn').addEventListener('click', function() {
@@ -586,8 +586,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Actualizar barra de progreso
         actualizarBarraProgreso();
         
-        // Guardar el estado restaurado
-        guardarEstados();
+        // Ya no guardamos automáticamente
+        // guardarEstados();
         
         // Mostrar mensaje flash
         mostrarMensajeFlash('Cambio deshecho correctamente', 'info');
@@ -597,6 +597,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('deshacerBtn').disabled = true;
         }
     }
+    
+    // Ya no necesitamos el botón de cargar progreso
     
     // Configurar botón de deshacer
     document.getElementById('deshacerBtn').addEventListener('click', function() {
@@ -632,8 +634,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Actualizar barra de progreso
                 actualizarBarraProgreso();
                 
-                // Guardar el nuevo estado inicial
-                guardarEstados();
+                // Ya no guardamos automáticamente
+                // guardarEstados();
                 
                 // Mostrar mensaje flash
                 mostrarMensajeFlash('¡Materias reiniciadas correctamente!', 'success');

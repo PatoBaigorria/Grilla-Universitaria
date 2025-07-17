@@ -496,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
     guardarEstados();
     
     // Configurar botón de guardado
-    document.getElementById('btnGuardar').addEventListener('click', function() {
+    document.getElementById('guardarBtn').addEventListener('click', function() {
         try {
             // Mostrar indicador de carga
             this.disabled = true;
@@ -522,5 +522,78 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     
-    // Código para los botones adicionales eliminado para simplificar la interfaz
+    // Configurar botón de reinicio
+    document.getElementById('reiniciarBtn').addEventListener('click', function() {
+        if (confirm('¿Estás seguro de que quieres reiniciar todas las materias a su estado inicial? Esta acción no se puede deshacer.')) {
+            try {
+                // Mostrar indicador de carga
+                this.disabled = true;
+                this.innerHTML = 'Reiniciando...';
+                
+                // Reiniciar estados de materias
+                estadosMaterias = {};
+                
+                // Eliminar clases de todas las materias
+                todasLasMaterias.forEach(materia => {
+                    materia.classList.remove('cursando');
+                    materia.classList.remove('aprobada');
+                });
+                
+                // Reinicializar materias (esto aplicará las clases bloqueadas correctamente)
+                inicializarMaterias();
+                
+                // Revisar correlativas para actualizar estados
+                revisarCorrelativas();
+                
+                // Actualizar barra de progreso
+                actualizarBarraProgreso();
+                
+                // Guardar el nuevo estado inicial
+                guardarEstados();
+                
+                // Mostrar mensaje flash
+                mostrarMensajeFlash('¡Materias reiniciadas correctamente!', 'success');
+            } catch (error) {
+                console.error('Error en el proceso de reinicio:', error);
+                alert('Error al reiniciar las materias. Inténtalo de nuevo.');
+            } finally {
+                // Restaurar el botón
+                this.disabled = false;
+                this.innerHTML = 'Reiniciar materias';
+            }
+        }
+    });
+    
+    // Función para mostrar mensajes flash temporales
+    function mostrarMensajeFlash(mensaje, tipo = 'success', duracion = 3000) {
+        const flashContainer = document.getElementById('flashMessage');
+        
+        // Limpiar cualquier mensaje anterior
+        flashContainer.textContent = '';
+        flashContainer.className = 'flash-message';
+        
+        // Agregar clase según el tipo de mensaje
+        flashContainer.classList.add(`flash-${tipo}`);
+        
+        // Establecer el mensaje
+        flashContainer.textContent = mensaje;
+        
+        // Mostrar el mensaje
+        flashContainer.style.display = 'block';
+        
+        // Efecto de aparición
+        setTimeout(() => {
+            flashContainer.style.opacity = '1';
+        }, 10);
+        
+        // Ocultar después de la duración especificada
+        setTimeout(() => {
+            flashContainer.style.opacity = '0';
+            
+            // Eliminar el elemento después de la transición
+            setTimeout(() => {
+                flashContainer.style.display = 'none';
+            }, 500);
+        }, duracion);
+    }
 });
